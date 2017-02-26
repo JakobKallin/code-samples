@@ -1,5 +1,14 @@
-#!/usr/bin/env php
 <?php
+
+function http_get($url) {
+    $curl = curl_init($url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
+    $response = curl_exec($curl);
+    curl_close($curl);
+    return $response;
+}
 
 function document_from_html(string $html):DOMDocument {
     $doc = new DOMDocument();
@@ -50,19 +59,18 @@ function file_type_from_url(string $url_string):string {
     if ($url['scheme'] == 'mailto') {
         return 'email';
     }
-    else {
+    elseif (isset($url['path'])) {
         $pathinfo = pathinfo($url['path']);
         if (isset($pathinfo['extension'])) {
             $file_type = file_type_from_extension($pathinfo['extension']);
             return $file_type === null ? 'unknown' : $file_type;
         }
-        else {
-            return 'page';
-        }
+        else return 'page';
     }
+    else return 'page';
 }
 
-function file_type_from_extension(string $extension):string {
+function file_type_from_extension(string $extension) {
     $type_from_extension = [
         'gif' => 'image',
         'html' => 'page',
@@ -80,24 +88,35 @@ function file_type_from_extension(string $extension):string {
     return null;
 }
 
-$args = array_slice($argv, 1);
-if (empty($args)) {
-    print "Usage: php index.php <url>\n";
+if (!isset($_GET['url'])) {
+    http_response_code(400);
+    print 'You must provide a URL with the "URL" query parameter.';
     exit(1);
 }
 
-$url = $args[0];
-$html = file_get_contents($url);
+$url = $_GET['url'];
+$sort_by = isset($_GET['sort-by']) && in_array($_GET['sort-by'], ['url', 'title', 'type'])
+    ? $_GET['sort-by']
+    : 'title';
+$filter = isset($_GET['filter']) ? $_GET['filter'] : '';
+
+$html = http_get($url);
 $doc = document_from_html($html);
 $link_elements = array_from_nodelist($doc->getElementsByTagName('a'));
 $links = array_map(function($element) use($url) {
     return link_from_element($element, $url);
 }, $link_elements);
-usort($links, function($a, $b) {
-    return $a['title'] <=> $b['title'];
+
+$links = array_filter($links, function($link) use($filter) {
+    return
+        $filter === ''
+        || stripos($link['url'], $filter) !== FALSE
+        || stripos($link['title'], $filter) !== FALSE
+        || stripos($link['type'], $filter) !== FALSE;
 });
 
-$stdout = fopen('php://stdout', 'w');
-foreach ($links as $link) {
-    fputcsv($stdout, [$link['title'], $link['url'], $link['type']]);
-}
+usort($links, function($a, $b) use($sort_by) {
+    return $a[$sort_by] <=> $b[$sort_by];
+});
+
+print json_encode($links, JSON_PRETTY_PRINT);
