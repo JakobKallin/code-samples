@@ -119,4 +119,5 @@ usort($links, function($a, $b) use($sort_by) {
     return $a[$sort_by] <=> $b[$sort_by];
 });
 
+header('Content-Type: application/json');
 print json_encode($links, JSON_PRETTY_PRINT);
