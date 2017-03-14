@@ -34,7 +34,7 @@ def file_type_from_extension(extension):
         'jpeg': 'image',
         'jpg': 'image',
         'mp3': 'audio',
-        'pdf': 'pdf',
+        'pdf': 'PDF',
         'png': 'image',
         'xml': 'XML file',
     }
