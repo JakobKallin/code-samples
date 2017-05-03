@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="index.xsl"?>
+<quiz>
+    <question>
+        <prompt>What is the capital of Sweden?</prompt>
+        <option correct="true">Stockholm</option>
+        <option>Copenhagen</option>
+        <option>Gothenburg</option>
+        <option>Oslo</option>
+    </question>
+    <question>
+        <prompt>What is the capital of France?</prompt>
+        <option correct="true">Paris</option>
+        <option>Brussels</option>
+        <option>Marseille</option>
+        <option>Zürich</option>
+    </question>
+    <question>
+        <prompt>Which is the largest country on earth by area?</prompt>
+        <option correct="true">Russia</option>
+        <option>Canada</option>
+        <option>China</option>
+        <option>United States</option>
+    </question>
+</quiz>
