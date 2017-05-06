@@ -63,7 +63,7 @@ link_elements = document.css('a')
 links = link_elements.map{|e| link_from_element(e, url)}
 sorted_links = links.sort_by{|l| l[:title].downcase}
 
-puts CSV.generate{|csv|
+puts CSV.generate {|csv|
     sorted_links.each do |link|
         csv << [link[:title], link[:url], link[:type]]
     end
